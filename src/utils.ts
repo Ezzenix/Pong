@@ -21,6 +21,10 @@ export class Vector3 {
 		return new Vector3(this.x * factor, this.y * factor, this.z * factor);
 	}
 
+	clone(): Vector3 {
+		return new Vector3(this.x, this.y, this.z);
+	}
+
 	lerp(other: Vector3, t: number): Vector3 {
 		return new Vector3(lerp(this.x, other.x, t), lerp(this.y, other.y, t), lerp(this.z, other.z, t));
 	}
@@ -49,6 +53,10 @@ export class Vector2 {
 
 	multiply(factor: number): Vector2 {
 		return new Vector2(this.x * factor, this.y * factor);
+	}
+
+	clone(): Vector2 {
+		return new Vector2(this.x, this.y);
 	}
 
 	lerp(other: Vector2, t: number): Vector2 {

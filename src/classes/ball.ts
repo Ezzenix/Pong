@@ -1,7 +1,8 @@
-import Round from "./round";
+import Round, { States } from "./round";
 import { lerp, factorBetween, clamp, Vector2, randomNumber } from "../utils";
 import GameObject, { Shapes } from "./gameObject";
 import Player from "./player";
+import { PlaySound } from "../sounds";
 
 const xPadding = 48;
 let mousePosition = { x: 0, y: 0 };
@@ -10,6 +11,9 @@ export default class Ball {
 	gameObject: GameObject;
 	round: Round;
 	velocity: Vector2;
+	lastPredictedTime: number;
+	lastPredictedY: number;
+	lastPredictedX: number;
 
 	constructor(round: Round) {
 		const canvas = round.canvas;
@@ -20,6 +24,9 @@ export default class Ball {
 			Shapes.Circle
 		);
 		this.round = round;
+		this.lastPredictedTime = performance.now();
+		this.lastPredictedY = canvas.height / 2;
+		this.lastPredictedX = canvas.width - 42;
 		this.velocity = new Vector2(0, 0);
 		this.reset();
 	}
@@ -80,10 +87,12 @@ export default class Ball {
 						// touching player on left side of map
 						//velocity.x *= -1;
 						this.randomVelocity(1);
+						PlaySound("Bounce");
 					} else if (playerPos.x > width / 2 && velocity.x > 0) {
 						// touching player on right side of map
 						//velocity.x *= -1;
 						this.randomVelocity(-1);
+						PlaySound("Bounce");
 					}
 				}
 			}
@@ -97,6 +106,10 @@ export default class Ball {
 		const xDir = Math.round(randomNumber(0, 1)) == 0 ? -1 : 1;
 		const yDir = Math.round(randomNumber(0, 1)) == 0 ? -1 : 1;
 		this.velocity = new Vector2(800 * xDir, 500 * yDir);
+
+		// DEBUG PREDICTION
+		//this.gameObject.position = new Vector2(1700, 950);
+		//this.velocity = new Vector2(400, 500);
 	}
 
 	randomVelocity(direction: -1 | 1) {
@@ -105,7 +118,6 @@ export default class Ball {
 		const rand = randomNumber(0, 1);
 		const is = rand === 0 ? -1 : 1;
 		const y = randomNumber(650, 900) * is;
-		console.log(rand, is, y);
 		this.velocity = new Vector2(x, y);
 	}
 
@@ -115,10 +127,76 @@ export default class Ball {
 	}
 
 	tick(deltaTime: number) {
+		//if (this.gameObject.position.x > this.round.canvas.width * 0.9) return;
 		this.update(deltaTime);
 	}
 
+	predictPosition(context: CanvasRenderingContext2D) {
+		if (performance.now() - this.lastPredictedTime < 20) return;
+		this.lastPredictedTime = performance.now();
+
+		const width = this.round.canvas.width;
+		const height = this.round.canvas.height;
+		let pos = this.gameObject.position.clone();
+		let vel = this.velocity.clone();
+
+		const distance = () => {
+			return this.round.player2.gameObject.position.x - pos.x;
+		};
+
+		let tries = 0;
+
+		while (true) {
+			const dist = distance();
+			if (dist < this.gameObject.size.x / 2) break;
+			if (tries > 500) break;
+			if (pos.x > 2500) break;
+			tries += 1;
+
+			pos = pos.add(vel.multiply(0.005));
+
+			// Bottom
+			if (pos.y > height - this.gameObject.size.y / 2) {
+				if (vel.y > 0) {
+					vel.y *= -1;
+				}
+			}
+
+			// Top
+			if (pos.y < 0 + this.gameObject.size.y / 2) {
+				if (vel.y < 0) {
+					vel.y *= -1;
+				}
+			}
+		}
+
+		//console.log(pos);
+		this.lastPredictedY = pos.y;
+		this.lastPredictedX = Math.min(pos.x, 1900); //this.round.canvas.width - 42;
+	}
+
+	drawDot(color: string, x: number, y: number, size: number) {
+		const context = this.round.canvas.getContext("2d") as CanvasRenderingContext2D;
+		context.fillStyle = color;
+		context.fillRect(x - size / 2, y - size / 2, size, size);
+	}
+
 	render(context: CanvasRenderingContext2D) {
+		if (this.round.state == States.Playing) {
+			this.predictPosition(context);
+
+			/*
+			this.drawDot("purple", this.lastPredictedX, this.lastPredictedY, 16);
+
+			context.beginPath();
+			context.moveTo(this.gameObject.position.x, this.gameObject.position.y);
+			const to = this.gameObject.position.add(this.velocity);
+			context.lineTo(to.x, to.y);
+			context.fillStyle = "white";
+			context.stroke();
+			*/
+		}
+
 		context.fillStyle = "white";
 		this.gameObject.render(context);
 	}

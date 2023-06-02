@@ -16,3 +16,5 @@ document.onkeydown = (e) => {
 window.addEventListener("click", (e) => {
 	round.triggerStart();
 });
+
+round.triggerStart();

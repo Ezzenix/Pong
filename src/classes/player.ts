@@ -40,7 +40,18 @@ export default class Player {
 	}
 
 	tickAi() {
-		this.gameObject.position.y = this.round.ball.gameObject.position.y;
+		const SPEED = 7;
+		const THRESHOLD = 5;
+
+		if (this.round.ball.gameObject.position.x < this.round.canvas.width * 0.55 || this.round.ball.velocity.x < 0)
+			return;
+
+		const pos = this.gameObject.position;
+		const actualDiff = this.round.ball.lastPredictedY - pos.y;
+		const diff = clamp(actualDiff, -SPEED, SPEED);
+		if (diff < THRESHOLD && diff > -THRESHOLD) return;
+
+		pos.y = lerp(pos.y, pos.y + diff, 0.8);
 	}
 
 	tick() {

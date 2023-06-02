@@ -1,5 +1,6 @@
 import Player from "./player";
 import Ball from "./ball";
+import { PlaySound } from "../sounds";
 
 export default class Round {
 	player1: Player;
@@ -32,6 +33,12 @@ export default class Round {
 		if (this.state != States.Playing) return;
 		this.state = States.Ready;
 
+		if (winner == this.player1) {
+			PlaySound("Score");
+		} else {
+			PlaySound("Loss");
+		}
+
 		winner.score += 1;
 
 		this.player1.reset();
@@ -58,16 +65,22 @@ export default class Round {
 			context.font = "42px Comic Sans MS";
 			context.fillStyle = "white";
 			context.textAlign = "center";
-			context.fillText("Press any key to start...", width / 2, 220);
+			context.fillText("Press any key to start", width / 2, 240);
 		}
 		// Score
 		context.font = "38px Comic Sans MS";
 		context.fillStyle = "white";
-
-		context.textAlign = "left";
-		context.fillText(this.player1.score.toString(), 22, 52);
 		context.textAlign = "right";
-		context.fillText(this.player2.score.toString(), width - 22, 52);
+		context.fillText(this.player1.score.toString(), width / 2 - 62, 72);
+		context.textAlign = "left";
+		context.fillText(this.player2.score.toString(), width / 2 + 62, 72);
+
+		// Middle Line
+		const middleLineWidth = 2;
+		context.fillStyle = "white";
+		context.globalAlpha = 0.025;
+		context.fillRect(width / 2 - middleLineWidth / 2, 0, middleLineWidth, height);
+		context.globalAlpha = 1;
 
 		// Tick
 		if (this.state == States.Playing) {
