@@ -1,11 +1,18 @@
-/**
- * This file is just a silly example to show everything working in the browser.
- * When you're ready to start on your site, clear the file. Happy hacking!
- **/
+import Round from "./classes/round";
 
-import confetti from 'canvas-confetti';
+const round = new Round();
 
-confetti.create(document.getElementById('canvas') as HTMLCanvasElement, {
-  resize: true,
-  useWorker: true,
-})({ particleCount: 200, spread: 200 });
+function tick() {
+	if (round) {
+		round.tick();
+	}
+	window.requestAnimationFrame(tick);
+}
+window.requestAnimationFrame(tick);
+
+document.onkeydown = (e) => {
+	round.triggerStart();
+};
+window.addEventListener("click", (e) => {
+	round.triggerStart();
+});

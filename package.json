@@ -1,4 +1,5 @@
 {
+  "name": "pong",
   "scripts": {
     "start": "snowpack dev",
     "build": "snowpack build",
