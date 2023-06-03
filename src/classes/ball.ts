@@ -14,6 +14,7 @@ export default class Ball {
 	lastPredictedTime: number;
 	lastPredictedY: number;
 	lastPredictedX: number;
+	bounces: number;
 
 	constructor(round: Round) {
 		const canvas = round.canvas;
@@ -28,13 +29,15 @@ export default class Ball {
 		this.lastPredictedY = canvas.height / 2;
 		this.lastPredictedX = canvas.width - 42;
 		this.velocity = new Vector2(0, 0);
+		this.bounces = 0;
 		this.reset();
 	}
 
 	update(deltaTime: number) {
 		const gameObject = this.gameObject;
 
-		gameObject.position = gameObject.position.add(this.velocity.multiply(deltaTime));
+		const speedMultiplier = 1 + this.bounces * 0.025;
+		gameObject.position = gameObject.position.add(this.velocity.multiply(deltaTime).multiply(speedMultiplier));
 
 		const position = gameObject.position;
 		const size = gameObject.size;
@@ -87,11 +90,13 @@ export default class Ball {
 						// touching player on left side of map
 						//velocity.x *= -1;
 						this.randomVelocity(1);
+						this.bounces += 1;
 						PlaySound("Bounce");
 					} else if (playerPos.x > width / 2 && velocity.x > 0) {
 						// touching player on right side of map
 						//velocity.x *= -1;
 						this.randomVelocity(-1);
+						this.bounces += 1;
 						PlaySound("Bounce");
 					}
 				}
@@ -124,6 +129,7 @@ export default class Ball {
 	reset() {
 		this.velocity = new Vector2(0, 0);
 		this.gameObject.position = new Vector2(this.round.canvas.width / 2, this.round.canvas.height / 2);
+		this.bounces = 0;
 	}
 
 	tick(deltaTime: number) {
