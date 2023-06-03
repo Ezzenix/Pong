@@ -1,20 +1,27 @@
 import Player from "./player";
 import Ball from "./ball";
 import { PlaySound } from "../sounds";
+import { CanvasHeight, CanvasWidth, PlayerInset } from "../constants";
 
 export default class Round {
+	canvas: HTMLCanvasElement;
+	context: CanvasRenderingContext2D;
 	player1: Player;
 	player2: Player;
 	ball: Ball;
-	canvas: HTMLCanvasElement;
 	lastTick: number;
 	state: number;
 
 	constructor() {
 		this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
+		this.canvas.width = CanvasWidth;
+		this.canvas.height = CanvasHeight;
+		this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+		this.context.shadowBlur = 7;
+		this.context.shadowColor = "white";
 
-		this.player1 = new Player(this, 42, false);
-		this.player2 = new Player(this, this.canvas.width - 42, true);
+		this.player1 = new Player(this, PlayerInset, true);
+		this.player2 = new Player(this, CanvasWidth - PlayerInset, true);
 		this.ball = new Ball(this);
 
 		this.state = States.Ready;
@@ -58,39 +65,37 @@ export default class Round {
 	}
 
 	render() {
-		const context = this.canvas.getContext("2d");
-		if (!context) return;
-		const width = this.canvas.width;
-		const height = this.canvas.height;
+		const ctx = this.context;
 
 		// Draw background
-		context.fillStyle = "#0c0c0f";
-		context.fillRect(0, 0, width, height);
+		ctx.fillStyle = "#0c0c0f";
+		ctx.fillRect(0, 0, CanvasWidth, CanvasHeight);
 		const middleLineWidth = 2;
-		context.fillStyle = "white";
-		context.globalAlpha = 0.025;
-		context.fillRect(width / 2 - middleLineWidth / 2, 0, middleLineWidth, height);
-		context.globalAlpha = 1;
+		ctx.fillStyle = "white";
+		ctx.globalAlpha = 0.025;
+		ctx.fillRect(CanvasWidth / 2 - middleLineWidth / 2, 0, middleLineWidth, CanvasHeight);
+		ctx.globalAlpha = 1;
 
 		// Text
 		if (this.state == States.Ready) {
 			// Press any key to start
-			context.font = "42px Comic Sans MS";
-			context.fillStyle = "white";
-			context.textAlign = "center";
-			context.fillText("Press any key to start", width / 2, 240);
+			ctx.font = "42px Comic Sans MS";
+			ctx.fillStyle = "white";
+			ctx.textAlign = "center";
+			ctx.fillText("Press any key to start", CanvasWidth / 2, 240);
 		}
 		// Score
-		context.font = "38px Comic Sans MS";
-		context.fillStyle = "white";
-		context.textAlign = "right";
-		context.fillText(this.player1.score.toString(), width / 2 - 62, 72);
-		context.textAlign = "left";
-		context.fillText(this.player2.score.toString(), width / 2 + 62, 72);
+		ctx.font = "38px Comic Sans MS";
+		ctx.fillStyle = "white";
+		ctx.textAlign = "right";
+		ctx.fillText(this.player1.score.toString(), CanvasWidth / 2 - 62, 72);
+		ctx.textAlign = "left";
+		ctx.fillText(this.player2.score.toString(), CanvasWidth / 2 + 62, 72);
 
-		this.player1.render(context);
-		this.player2.render(context);
-		this.ball.render(context);
+		// GameObjects
+		this.player1.render();
+		this.player2.render();
+		this.ball.render();
 	}
 }
 

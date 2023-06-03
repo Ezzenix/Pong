@@ -1,16 +1,27 @@
-const Sounds: { [key: string]: HTMLAudioElement } = {
-	Bounce: new Audio("./audio/ballbounce.wav"),
-	Score: new Audio("./audio/score.mp3"),
-	Loss: new Audio("./audio/loss.mp3"),
+const Sounds: { [key: string]: { Element: HTMLAudioElement; Volume?: number } } = {
+	Bounce: {
+		Element: new Audio("./audio/ballbounce.wav"),
+		Volume: 0.25,
+	},
+	Score: {
+		Element: new Audio("./audio/score.mp3"),
+		Volume: 1,
+	},
+	Loss: {
+		Element: new Audio("./audio/loss.mp3"),
+		Volume: 1,
+	},
 };
 
-Sounds.Bounce.volume = 0.3;
-
-export function PlaySound(name: string) {
+export function PlaySound(name: string, origin?: string) {
 	try {
-		Sounds[name].play();
+		const sound = Sounds[name];
+		const element = sound.Element.cloneNode(true) as HTMLAudioElement;
+		if (sound.Volume) {
+			element.volume = sound.Volume;
+		}
+		element.play();
 	} catch (err) {
-		console.warn(`Failed to play sound ${name}:`);
-		console.warn(err);
+		console.log(err);
 	}
 }

@@ -11,18 +11,18 @@ export default class GameObject {
 		this.shape = shape;
 	}
 
-	render(context: CanvasRenderingContext2D) {
+	render(ctx: CanvasRenderingContext2D) {
 		const pos = this.position;
 		const size = this.size;
 
 		if (this.shape == Shapes.Circle) {
 			const radius = Math.max(size.x, size.y) / 2;
 
-			context.beginPath();
-			context.arc(pos.x, pos.y, radius, 0, 2 * Math.PI);
-			context.fill();
+			ctx.beginPath();
+			ctx.arc(pos.x, pos.y, radius, 0, 2 * Math.PI);
+			ctx.fill();
 		} else {
-			context.fillRect(pos.x - size.x / 2, pos.y - size.y / 2, size.x, size.y);
+			ctx.fillRect(pos.x - size.x / 2, pos.y - size.y / 2, size.x, size.y);
 		}
 	}
 }
