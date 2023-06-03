@@ -20,7 +20,7 @@ export default class Round {
 		this.context.shadowBlur = 7;
 		this.context.shadowColor = "white";
 
-		this.player1 = new Player(this, PlayerInset, true);
+		this.player1 = new Player(this, PlayerInset, false);
 		this.player2 = new Player(this, CanvasWidth - PlayerInset, true);
 		this.ball = new Ball(this);
 
